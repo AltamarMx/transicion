@@ -1,37 +1,92 @@
 ---
-title: "Emisiones CO2 y energías renovables"
+title: "$CO^2$ y energías renovables"
 autor: G. Barrios
 format: dashboard
 logo: img/logo.png
 ---
 
-
-
-
-<!-- DATOS Y PAQUETES USADOS POR TODO EL TABLERO
 ```{python}
+
 import pandas as pd
 import plotly.express as px
+import colormaps as cmaps
+import seaborn as sns
+from itables import show
+# from itables import init_notebook_mode
 
-f = "data/owid-energy-data.csv"
-energia = pd.read_csv(f)
+# init_notebook_mode(all_interactive=True)
 
 
-lista_paises = ['Argentina', 'Bolivia', 'Brazil', 'Chile', 'Colombia', 'Costa Rica', 
-                'Cuba', 'Dominican Republic', 'Ecuador', 'Guatemala', 'Honduras', 
-                'Mexico',  'Panama', 'Paraguay', 'Peru', 
-                'El Salvador', 'Uruguay', 'Venezuela', 'World'] 
-paises = energia[energia["country"].isin(lista_paises)]
+def filtra_maxyear(co2):
+    return co2[co2.Year == co2.Year.max()]
+
  
+f = "data/co-emissions-per-capita.csv"
+co2_percapita = pd.read_csv(f)
+co2_percapita = filtra_maxyear(co2_percapita)
+
+f = "data/co2-intensity.csv"
+co2_intensity = pd.read_csv(f)
+co2_intensity = filtra_maxyear(co2_intensity)
+
+f = "data/annual-co2-emissions-per-country.csv"
+co2_percountry = pd.read_csv(f)
+co2_percountry = filtra_maxyear(co2_percountry)
+
+
+
 ```
-  -->
 
-# Emisiones Latam
+# CO₂ per cápita
+El **CO₂ per cápita**  es una medida que representa la cantidad promedio de dióxido de carbono (CO₂) emitido por cada persona en un país o región en un período específico, generalmente expresado en toneladas por año. Es un indicador que refleja el impacto ambiental en relación con la población.
 
-# Emisiones porcentuales Mx respecto al mundo para 2024
+## Row
 
-# Matriz energética de México
+### Emisiones per cápita {width=75%}
 
-# Emisiones per capita latam
+```{python}
+# co2_percapita
 
-# Evolución de las renovables en latam
+# df['CO₂ discretized'] = pd.cut(df['Annual CO₂ emissions (per capita)'], bins=10, labels=False)
+
+colors = sns.color_palette("rocket", n_colors=10).as_hex()
+
+fig = px.choropleth(
+    co2_percapita, 
+    locations='Code', 
+    color="Annual CO₂ emissions (per capita)",  # Usar los datos discretizados
+    hover_name='Entity', 
+    color_continuous_scale=colors,  # Aplicar la paleta de colores discretos
+    labels={"Annual CO₂ emissions (per capita)": 'CO₂<br>[ton]'},
+)
+
+fig.update_layout(
+    # width=1000,  # Ancho de la figura
+    # height=600,  # Alto de la figura
+    coloraxis_colorbar=dict(
+        orientation='h',  # Orientar la barra de color en horizontal
+        x=0.5,  # Centrar la barra de color en el eje X
+        y=-0.15,  # Colocar la barra de color por debajo del mapa,
+        len=0.9
+    ),
+    margin={"r":0,"t":50,"l":0,"b":50},  # Ajustar márgenes para dar espacio a la barra de color
+    geo=dict(
+        showframe=False,  # Quitar el borde del mapa
+        showcoastlines=False,  # Quitar las líneas de costa
+        showland=False,  # Quitar la representación de tierra
+    )
+)
+
+
+```
+
+
+### Datos {width=25%}
+
+```{python}
+co2_percapita.sort_values(by="Annual CO₂ emissions (per capita)",inplace=True, ascending=False)
+co2_percapita.rename(columns={"Annual CO₂ emissions (per capita)":"CO₂"},inplace=True)
+show(co2_percapita[["Entity","CO₂"]].round(1),showIndex=False)
+# show(co2_percapita[["Entity","Annual CO₂ emissions (per capita)"]],scrollY="200px", scrollCollapse=True, paging=False)
+```
+

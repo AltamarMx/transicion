@@ -40,6 +40,8 @@ co2_percountry = filtra_maxyear(co2_percountry)
 # CO₂ per cápita
 El **CO₂ per cápita**  es una medida que representa la cantidad promedio de dióxido de carbono (CO₂) emitido por cada persona en un país o región en un período específico, generalmente expresado en toneladas por año. Es un indicador que refleja el impacto ambiental en relación con la población.
 
+Aqui van unas cards que calculan cuanto se emite en el país que emite más per capita, menos y México como referencia, especificando por habitante
+
 ## Row
 
 ### Emisiones per cápita {width=75%}

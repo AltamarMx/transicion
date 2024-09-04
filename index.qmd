@@ -1,5 +1,5 @@
 ---
-title: "Quién es quién en<br>$CO^2$ en el mundo"
+title: "Quién es quién en<br>$CO_2$ en el mundo"
 autor: G. Barrios
 format: dashboard
 logo: img/logo.png
@@ -49,16 +49,21 @@ co2_income = co2[co2.Entity.isin(incomes)]
 
 # CO₂ en el mundo
 
-## Row {height="15%"}
+## Row {height="20%"}
 
-::: {.card}
-```{python}
-print("Máximo")
+```{python} 
+#| content: valuebox
+#| title: "Tton de CO₂anual máximo por país "
+#| color: primary
+
 co2_max = co2_percountry[co2_percountry.Year == co2_percountry.Year.max()]
-print(f"{co2_max["Annual CO₂ emissions"].max()/1000_000_000:.3f} Tton CO₂")
-```
+co2_max = co2_max["Annual CO₂ emissions"].max()/1000_000_000
 
-:::
+dict(
+  value = (co2_max).round(2)
+)
+
+```
 
 ::: {.card}
 ```{python}

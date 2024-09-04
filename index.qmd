@@ -49,6 +49,43 @@ co2_income = co2[co2.Entity.isin(incomes)]
 
 # CO₂ en el mundo
 
+## Row {height="15%"}
+
+::: {.card}
+```{python}
+print("Máximo")
+co2_max = co2_percountry[co2_percountry.Year == co2_percountry.Year.max()]
+print(f"{co2_max["Annual CO₂ emissions"].max()/1000_000_000:.3f} Tton CO₂")
+```
+
+:::
+
+::: {.card}
+```{python}
+print("Promedio")
+co2_mean = co2_percountry[co2_percountry.Year == co2_percountry.Year.max()]
+print(f"{co2_mean["Annual CO₂ emissions"].mean()/1000_000_000:.3f} Tton CO₂")
+```
+:::
+
+::: {.card}
+```{python}
+print("México")
+co2_mex = co2_percountry[(co2_percountry.Year == co2_percountry.Year.max()) & (co2.Entity=="Mexico")]
+print(f"{co2_mex["Annual CO₂ emissions"].values[0]/1000_000_000} Tton CO₂")
+```
+:::
+
+
+::: {.card}
+```{python}
+print("Mínimo != 0")
+co2_min = co2_percountry[(co2_percountry.Year == co2_percountry.Year.max()) & (co2["Annual CO₂ emissions"]>0)]
+print(f"{co2_min["Annual CO₂ emissions"].min()/1000:.3f} Kton CO₂")
+```
+:::
+
+
 
 ## Row 
 
@@ -71,7 +108,7 @@ fig = px.area(
     labels={
         'Year': '', 
         'Annual CO₂ emissions': 'CO₂ [ton]',
-        'Entity': 'ssssssssssssssssssss sss'
+        'Entity': ''
     },
 )
 fig.update_layout(legend=dict(
@@ -134,6 +171,6 @@ fig.update_layout(
 ```{python}
 co2_percapita.sort_values(by="Annual CO₂ emissions (per capita)",inplace=True, ascending=False)
 co2_percapita.rename(columns={"Annual CO₂ emissions (per capita)":"CO₂"},inplace=True)
-show(co2_percapita[["Entity","CO₂"]].round(1),showIndex=False)
+# show(co2_percapita[["Entity","CO₂"]].round(1),showIndex=False)
 ```
 

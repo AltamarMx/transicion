@@ -4,124 +4,161 @@ autor: G. Barrios
 format: dashboard
 logo: img/logo.png
 ---
-
 ```{python}
-
 import pandas as pd
 import plotly.express as px
-import colormaps as cmaps
 import seaborn as sns
-from itables import show
-# from itables import init_notebook_mode
 
-# init_notebook_mode(all_interactive=True)
 
 
 def filtra_maxyear(co2):
     return co2[co2.Year == co2.Year.max()]
 
- 
 f = "data/co-emissions-per-capita.csv"
 co2_percapita = pd.read_csv(f)
 co2_percapita = filtra_maxyear(co2_percapita)
 
-f = "data/co2-intensity.csv"
-co2_intensity = pd.read_csv(f)
-co2_intensity = filtra_maxyear(co2_intensity)
 
-f = "data/annual-co2-emissions-per-country.csv"
+f = 'data/annual-co2-emissions-per-country.csv'
 co2_percountry = pd.read_csv(f)
-co2_percountry = filtra_maxyear(co2_percountry)
+entities = co2_percountry.Entity.unique()
+grupos = [entity for entity in entities if 'income' in entity]
 
+co2_income = co2_percountry[co2_percountry.Entity.isin(grupos)].copy()
 
-
-f = "data/annual-co2-emissions-per-country.csv"
-co2 = pd.read_csv(f)
-entities = co2.Entity.unique()
-
-incomes = [entity for entity in entities if "income" in entity]
-co2_income = co2[co2.Entity.isin(incomes)]
-
-
-
+traduccion = {
+    'High-income countries': 'Ingresos altos',
+    'Low-income countries': 'Ingresos bajos',
+    'Lower-middle-income countries': 'Ingresos medios-bajos',
+    'Upper-middle-income countries': 'Ingresos medios-altos'
+}
+co2_income['Entity'] = co2_income['Entity'].replace(traduccion)
+co2_income['Tton CO₂'] = co2_income['Annual CO₂ emissions']/1e9
 
 ```
 
 # CO₂ en el mundo
 
+
 ## Row {height="20%"}
 
 ```{python} 
 #| content: valuebox
-#| title: "Tton de CO₂anual máximo por país "
-#| color: primary
+#| title: Tton de CO₂ para paises de ingresos altos
+#| color: blue
+#| icon: cloud-haze
 
-co2_max = co2_percountry[co2_percountry.Year == co2_percountry.Year.max()]
-co2_max = co2_max["Annual CO₂ emissions"].max()/1000_000_000
+mask_year = co2_income.Year == co2_income.Year.max()
+mask_income = co2_income.Entity == 'Ingresos altos'
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
 
-dict(
-  value = (co2_max).round(2)
-)
-
+dict(value =  co2.round(1))
 ```
 
-::: {.card}
-```{python}
-print("Promedio")
-co2_mean = co2_percountry[co2_percountry.Year == co2_percountry.Year.max()]
-print(f"{co2_mean["Annual CO₂ emissions"].mean()/1000_000_000:.3f} Tton CO₂")
+
+```{python} 
+#| content: valuebox
+#| title: "Tton de CO₂ de paises con ingreso  medios-altos"
+#| color: purple
+#| icon: cloud-haze
+mask_year = co2_income.Year == co2_income.Year.max()
+mask_income = co2_income.Entity == 'Ingresos medios-altos'
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
+
+dict(value =  co2.round(1))
 ```
-:::
 
-::: {.card}
-```{python}
-print("México")
-co2_mex = co2_percountry[(co2_percountry.Year == co2_percountry.Year.max()) & (co2.Entity=="Mexico")]
-print(f"{co2_mex["Annual CO₂ emissions"].values[0]/1000_000_000} Tton CO₂")
+```{python} 
+#| content: valuebox
+#| title: "Tton de CO₂ de paises de medios-bajos"
+#| color: green
+#| icon: cloud-haze
+
+mask_year = co2_income.Year == co2_income.Year.max()
+mask_income = co2_income.Entity == 'Ingresos medios-bajos'
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
+
+dict(value =  co2.round(1))
 ```
-:::
 
+```{python} 
+#| content: valuebox
+#| title: "Tton de CO₂ de paises de bajos"
+#| color: red
+#| icon: cloud-haze
+mask_year = co2_income.Year == co2_income.Year.max()
+mask_income = co2_income.Entity == 'Ingresos bajos'
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
 
-::: {.card}
-```{python}
-print("Mínimo != 0")
-co2_min = co2_percountry[(co2_percountry.Year == co2_percountry.Year.max()) & (co2["Annual CO₂ emissions"]>0)]
-print(f"{co2_min["Annual CO₂ emissions"].min()/1000:.3f} Kton CO₂")
+dict(value =  co2.round(1))
 ```
-:::
 
 
-
-## Row 
-
+## Row
 
 ```{python}
-co2_income['Entity'] = co2_income['Entity'].replace({
-    'High-income countries': 'Ingresos altos',
-    'Low-income countries': 'Ingresos bajos',
-    'Lower-middle-income countries': 'Ingreso medios-bajs',
-    'Upper-middle-income countries': 'Ingresos medios-altos'
-})
-
-
 
 fig = px.area(
     co2_income, 
     x='Year', 
-    y='Annual CO₂ emissions', 
+    y='Tton CO₂', 
     color='Entity', 
     labels={
-        'Year': '', 
-        'Annual CO₂ emissions': 'CO₂ [ton]',
+        'Year': 'Año', 
         'Entity': ''
     },
 )
+
 fig.update_layout(legend=dict(
     yanchor="top",
     y=0.99,
     xanchor="left",
     x=0.01
 ))
+
+```
+
+
+
+
+
+# CO₂ por país
+El **CO₂ per cápita**  es una medida que representa la cantidad promedio de dióxido de carbono (CO₂) emitido por cada persona en un país o región en un período específico, generalmente expresado en toneladas por año. Es un indicador que refleja el impacto ambiental en relación con la población.
+
+Aqui van unas cards que calculan cuanto se emite en el país que emite más per capita, menos y México como referencia, especificando por habitante
+
+## Row
+
+### Emisiones per cápita {width=75%}
+
+```{python}
+
+colors = sns.color_palette("rocket", n_colors=10).as_hex()
+
+fig = px.choropleth(
+    co2_percountry, 
+    locations='Code', 
+    color="Annual CO₂ emissions",  
+    hover_name='Entity', 
+    color_continuous_scale=colors,  
+    labels={"Annual CO₂ emissions": 'CO₂ <br>[ton]'},
+    range_color=(0, 1_000_000_000)
+)
+
+fig.update_layout(
+    coloraxis_colorbar=dict(
+        orientation='h',  
+        x=0.5,  
+        y=-0.15,  
+        len=0.9
+    ),
+    margin={"r":0,"t":50,"l":0,"b":50}, 
+    geo=dict(
+        showframe=False,  
+        showcoastlines=False,  
+        showland=False, 
+    )
+)
 
 
 ```
@@ -149,7 +186,8 @@ fig = px.choropleth(
     color="Annual CO₂ emissions (per capita)",  
     hover_name='Entity', 
     color_continuous_scale=colors,  
-    labels={"Annual CO₂ emissions (per capita)": 'CO₂<br>[ton]'},
+    labels={"Annual CO₂ emissions (per capita)": 'CO₂ <br>[ton/per]'},
+    range_color=(0, 8)
 )
 
 fig.update_layout(
@@ -169,13 +207,3 @@ fig.update_layout(
 
 
 ```
-
-
-### Datos {width=25%}
-
-```{python}
-co2_percapita.sort_values(by="Annual CO₂ emissions (per capita)",inplace=True, ascending=False)
-co2_percapita.rename(columns={"Annual CO₂ emissions (per capita)":"CO₂"},inplace=True)
-# show(co2_percapita[["Entity","CO₂"]].round(1),showIndex=False)
-```
-

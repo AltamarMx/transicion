@@ -128,7 +128,7 @@ fig.update_layout(legend=dict(
 
 
 
-# Top 15 paises en CO₂
+# Top 15 en CO₂ anual
 
 
 ## Row
@@ -182,7 +182,15 @@ fig.update_layout(
 ```{python}
 from great_tables import GT, md, html
 
-gt_tbl = GT(top15co2[["Lugar","Entity","Annual CO₂ emissions"]])
+nuevos_nombres = {
+    'Annual CO₂ emissions': 'CO₂ anual',
+    'Entity':'País',
+    "Lugar":"#"
+}
+
+top15co2 = top15co2.rename(columns=nuevos_nombres)
+
+gt_tbl = GT(top15co2[["#","País","CO₂ anual"]])
 gt_tbl
 
 ```
@@ -257,7 +265,7 @@ nuevos_nombres = {
 
 top15co2 = top15co2.rename(columns=nuevos_nombres)
 
-gt_tbl = GT(top15co2[["#","País","CO₂ per cápita"]]).fmt_number(columns=["CO₂ per cápita"], decimals=1)
+gt_tbl = GT(top15co2[["#","País","CO₂ per cápita"]]).fmt_number(columns=["CO₂ per cápita"], decimals=2)
 
 gt_tbl
 

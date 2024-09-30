@@ -190,27 +190,41 @@ gt_tbl
 
 
 
-# CO₂ per cápita
-El **CO₂ per cápita**  es una medida que representa la cantidad promedio de dióxido de carbono (CO₂) emitido por cada persona en un país o región en un período específico, generalmente expresado en toneladas por año. Es un indicador que refleja el impacto ambiental en relación con la población.
+# Top 15 en CO₂ per cápita
+<!-- El **CO₂ per cápita**  es una medida que representa la cantidad promedio de dióxido de carbono (CO₂) emitido por cada persona en un país o región en un período específico, generalmente expresado en toneladas por año. Es un indicador que refleja el impacto ambiental en relación con la población.
 
-Aqui van unas cards que calculan cuanto se emite en el país que emite más per capita, menos y México como referencia, especificando por habitante
+Aqui van unas cards que calculan cuanto se emite en el país que emite más per capita, menos y México como referencia, especificando por habitante -->
+
+
+
+
 
 ## Row
 
-### Emisiones per cápita {width=75%}
+###  {width=75%}
 
 ```{python}
+
+co2_ordered  = co2_percapita[["Code","Year","Annual CO₂ emissions (per capita)","Entity"]].sort_values(by="Annual CO₂ emissions (per capita)",ascending=False)
+
+co2_filtered = co2_ordered[co2_ordered['Code'].notnull()]
+co2_filtered = co2_ordered[co2_ordered['Code'].apply(lambda x: isinstance(x, str) and len(x) == 3 and x.isalpha())]
+
+top15co2 = co2_filtered.head(15)
+top15co2.reset_index(inplace=True)
+top15co2["Lugar"] = top15co2.index + 1
 
 colors = sns.color_palette("rocket", n_colors=10).as_hex()
 
 fig = px.choropleth(
-    co2_percapita, 
+    top15co2, 
     locations='Code', 
     color="Annual CO₂ emissions (per capita)",  
     hover_name='Entity', 
+    hover_data="Lugar",
     color_continuous_scale=colors,  
-    labels={"Annual CO₂ emissions (per capita)": 'CO₂ <br>[ton/per]'},
-    range_color=(0, 8)
+    labels={"Annual CO₂ emissions (per capita)": 'CO₂ per cápita <br>[ton]'},
+    range_color=(12, 37)
 )
 
 fig.update_layout(
@@ -224,9 +238,19 @@ fig.update_layout(
     geo=dict(
         showframe=False,  
         showcoastlines=False,  
-        showland=False, 
+        showland=True, 
     )
 )
 
+
+```
+
+### Top 15 paises
+
+```{python}
+from great_tables import GT, md, html
+
+gt_tbl = GT(top15co2[["Lugar","Entity","Annual CO₂ emissions (per capita)"]])
+gt_tbl
 
 ```

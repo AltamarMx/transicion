@@ -249,8 +249,16 @@ fig.update_layout(
 
 ```{python}
 from great_tables import GT, md, html
+nuevos_nombres = {
+    'Annual CO₂ emissions (per capita)': 'CO₂ per cápita',
+    'Entity':'País',
+    "Lugar":"#"
+}
 
-gt_tbl = GT(top15co2[["Lugar","Entity","Annual CO₂ emissions (per capita)"]])
+top15co2 = top15co2.rename(columns=nuevos_nombres)
+
+gt_tbl = GT(top15co2[["#","País","CO₂ per cápita"]]).fmt_number(columns=["CO₂ per cápita"], decimals=1)
+
 gt_tbl
 
 ```

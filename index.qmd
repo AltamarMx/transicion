@@ -37,76 +37,83 @@ co2_income['Tton CO₂'] = co2_income['Annual CO₂ emissions']/1e9
 
 ```
 
-# CO₂ en el mundo
+# CO₂ en el mundo  por nivel de ingreso
 
 
-## Row {height="20%"}
+## Row {height="30%"}
+
+
 
 ```{python} 
 #| content: valuebox
-#| title: Tton de CO₂ para paises de ingresos altos
+#| title: Emisiones anuales en Giga toneladas de CO₂ para paises de ingresos medios-altos en el 2022
+#| color: purple
+#| icon: cloud-haze
+mask_year = co2_income.Year == co2_income.Year.max()
+mask_income = co2_income.Entity == 'Ingresos medios-altos'
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]*1000
+formatted_co2 = '{:,.1f}'.format(co2)
+
+dict(value =  formatted_co2)
+```
+
+```{python} 
+#| content: valuebox
+#| title: Emisiones anuales en Giga toneladas de CO₂ para paises de ingresos altos durante el 2022
 #| color: blue
 #| icon: cloud-haze
 
 mask_year = co2_income.Year == co2_income.Year.max()
 mask_income = co2_income.Entity == 'Ingresos altos'
-co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0] * 1000
+formatted_co2 = '{:,.1f}'.format(co2)
 
-dict(value =  co2.round(1))
+dict(value =  formatted_co2)
 ```
 
 
 ```{python} 
 #| content: valuebox
-#| title: "Tton de CO₂ de paises con ingreso  medios-altos"
-#| color: purple
-#| icon: cloud-haze
-mask_year = co2_income.Year == co2_income.Year.max()
-mask_income = co2_income.Entity == 'Ingresos medios-altos'
-co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
-
-dict(value =  co2.round(1))
-```
-
-```{python} 
-#| content: valuebox
-#| title: "Tton de CO₂ de paises de medios-bajos"
+#| title: Emisiones anuales en Giga toneladas de CO₂ para paises de ingresos medios-bajos en el 2022
 #| color: green
 #| icon: cloud-haze
 
 mask_year = co2_income.Year == co2_income.Year.max()
 mask_income = co2_income.Entity == 'Ingresos medios-bajos'
-co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]*1000
+formatted_co2 = '{:,.1f}'.format(co2)
 
-dict(value =  co2.round(1))
+dict(value =  formatted_co2)
 ```
 
 ```{python} 
 #| content: valuebox
-#| title: "Tton de CO₂ de paises de bajos"
+#| title: Emisiones anuales en Giga toneladas de CO₂ para paises de ingresos bajos durante el 2022
 #| color: red
 #| icon: cloud-haze
 mask_year = co2_income.Year == co2_income.Year.max()
 mask_income = co2_income.Entity == 'Ingresos bajos'
-co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0]
+co2 = co2_income[mask_year & mask_income ][['Tton CO₂']].values[0][0] * 1000
+formatted_co2 = '{:,.1f}'.format(co2)
 
-dict(value =  co2.round(1))
+dict(value =  formatted_co2)
 ```
 
 
 ## Row
 
 ```{python}
-
 fig = px.area(
     co2_income, 
     x='Year', 
     y='Tton CO₂', 
     color='Entity', 
+    range_x= (1900,2022),
     labels={
         'Year': 'Año', 
         'Entity': ''
     },
+
 )
 
 fig.update_layout(legend=dict(
@@ -115,34 +122,41 @@ fig.update_layout(legend=dict(
     xanchor="left",
     x=0.01
 ))
-
 ```
 
 
 
 
 
-# CO₂ por país
-El **CO₂ per cápita**  es una medida que representa la cantidad promedio de dióxido de carbono (CO₂) emitido por cada persona en un país o región en un período específico, generalmente expresado en toneladas por año. Es un indicador que refleja el impacto ambiental en relación con la población.
+# Top 15 paises en CO₂
 
-Aqui van unas cards que calculan cuanto se emite en el país que emite más per capita, menos y México como referencia, especificando por habitante
 
 ## Row
 
-### Emisiones per cápita {width=75%}
+### Top 15 en CO₂ {width=75%}
 
 ```{python}
+
+co2_ordered  = co2_percountry[co2_percountry.Year == 2022][["Code","Year","Annual CO₂ emissions","Entity"]].sort_values(by="Annual CO₂ emissions",ascending=False)
+
+co2_filtered = co2_ordered[co2_ordered['Code'].notnull()]
+co2_filtered = co2_ordered[co2_ordered['Code'].apply(lambda x: isinstance(x, str) and len(x) == 3 and x.isalpha())]
+
+top15co2 = co2_filtered.head(15)
+top15co2.reset_index(inplace=True)
+top15co2["Lugar"] = top15co2.index + 1
 
 colors = sns.color_palette("rocket", n_colors=10).as_hex()
 
 fig = px.choropleth(
-    co2_percountry, 
+    top15co2, 
     locations='Code', 
     color="Annual CO₂ emissions",  
     hover_name='Entity', 
+    hover_data="Lugar",
     color_continuous_scale=colors,  
     labels={"Annual CO₂ emissions": 'CO₂ <br>[ton]'},
-    range_color=(0, 1_000_000_000)
+    range_color=(7e3, 1.1e10)
 )
 
 fig.update_layout(
@@ -156,13 +170,22 @@ fig.update_layout(
     geo=dict(
         showframe=False,  
         showcoastlines=False,  
-        showland=False, 
+        showland=True, 
     )
 )
 
 
 ```
 
+### Top 15 paises
+
+```{python}
+from great_tables import GT, md, html
+
+gt_tbl = GT(top15co2[["Lugar","Entity","Annual CO₂ emissions"]])
+gt_tbl
+
+```
 
 
 

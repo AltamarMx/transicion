@@ -2,7 +2,7 @@
 title: "Quién es quién en<br>$CO_2$ en el mundo"
 autor: G. Barrios
 format: dashboard
-logo: img/logo.png
+logo: img/ods-07.png
 ---
 ```{python}
 import pandas as pd
